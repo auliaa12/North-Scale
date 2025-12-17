@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition-colors duration-200 font-medium;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 px-6 py-2 rounded hover:bg-gray-300 transition-colors duration-200 font-medium;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition-colors duration-200 font-medium;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100;
+  }
+}
+
+/* Loading Animation */
+.loading-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #0ea5e9;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade In Animation */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Product Image Hover */
+.product-image-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-image-wrapper img {
+  transition: transform 0.3s ease;
+}
+
+.product-image-wrapper:hover img {
+  transform: scale(1.1);
+}
