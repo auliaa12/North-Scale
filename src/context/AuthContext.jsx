@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.login(credentials);
       const { user: adminData, token } = response.data;
-      localStorage.setItem('admin_token', token);
+      sessionStorage.setItem('admin_token', token);
       setAdmin({ ...adminData, role: 'admin' });
       return { success: true };
     } catch (error) {
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await userAPI.login(credentials);
       const { user: userData, token } = response.data;
-      localStorage.setItem('user_token', token);
+      sessionStorage.setItem('user_token', token);
       setUser({ ...userData, role: 'user' });
       return { success: true };
     } catch (error) {
@@ -50,29 +50,29 @@ export const AuthProvider = ({ children }) => {
     try {
       if (role === 'admin') {
         await authAPI.logout();
-        localStorage.removeItem('admin_token');
+        sessionStorage.removeItem('admin_token');
         setAdmin(null);
       } else {
         await userAPI.logout();
-        localStorage.removeItem('user_token');
+        sessionStorage.removeItem('user_token');
         setUser(null);
       }
     } catch (error) {
       console.error('Logout error:', error);
       // Force cleanup
       if (role === 'admin') {
-        localStorage.removeItem('admin_token');
+        sessionStorage.removeItem('admin_token');
         setAdmin(null);
       } else {
-        localStorage.removeItem('user_token');
+        sessionStorage.removeItem('user_token');
         setUser(null);
       }
     }
   };
 
   const checkAuth = async () => {
-    const adminToken = localStorage.getItem('admin_token');
-    const userToken = localStorage.getItem('user_token');
+    const adminToken = sessionStorage.getItem('admin_token');
+    const userToken = sessionStorage.getItem('user_token');
 
     // Check Admin Token
     if (adminToken) {
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
         const response = await authAPI.getUser();
         setAdmin({ ...response.data, role: 'admin' });
       } catch (error) {
-        localStorage.removeItem('admin_token');
+        sessionStorage.removeItem('admin_token');
         setAdmin(null);
       }
     }
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
         const response = await userAPI.getCurrentUser();
         setUser({ ...response.data, role: 'user' });
       } catch (error) {
-        localStorage.removeItem('user_token');
+        sessionStorage.removeItem('user_token');
         setUser(null);
       }
     }

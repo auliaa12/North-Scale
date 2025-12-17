@@ -260,6 +260,7 @@ export const getSessionId = () => {
   if (!sessionId) {
     sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem(STORAGE_KEYS.SESSION_ID, sessionId);
+    // Keep SESSION_ID in localStorage for cart persistence, but tokens move to sessionStorage
   }
   return sessionId;
 };
@@ -273,8 +274,8 @@ export const authService = {
 
     if (credentials.email === adminUser.email && credentials.password === adminUser.password) {
       const token = 'admin_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, token);
-      localStorage.setItem(STORAGE_KEYS.CURRENT_ADMIN_USER, JSON.stringify({
+      sessionStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, token);
+      sessionStorage.setItem(STORAGE_KEYS.CURRENT_ADMIN_USER, JSON.stringify({
         id: adminUser.id,
         name: adminUser.name,
         email: adminUser.email,
@@ -293,14 +294,14 @@ export const authService = {
   },
 
   logout: async () => {
-    localStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.CURRENT_ADMIN_USER);
+    sessionStorage.removeItem(STORAGE_KEYS.ADMIN_TOKEN);
+    sessionStorage.removeItem(STORAGE_KEYS.CURRENT_ADMIN_USER);
     return { data: { message: 'Logged out successfully' } };
   },
 
   getUser: async () => {
-    const token = localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN);
-    const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_ADMIN_USER));
+    const token = sessionStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN);
+    const user = JSON.parse(sessionStorage.getItem(STORAGE_KEYS.CURRENT_ADMIN_USER));
 
     if (token && user) {
       return { data: user };
@@ -427,7 +428,7 @@ export const productsService = {
       // Handle multiple images (up to 5)
       const imageFiles = formData.getAll('images[]');
       console.log('Image files:', imageFiles, imageFiles.length);
-      
+
       if (imageFiles && imageFiles.length > 0) {
         // Convert files to base64 data URLs
         const imagePromises = [];
@@ -469,7 +470,7 @@ export const productsService = {
 
                         // Convert to base64 with higher compression (quality 0.5 = 50% to save space)
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.5);
-                        
+
                         resolve({
                           id: Date.now() + index + Math.random() * 1000,
                           image_path: compressedBase64, // compressed base64 data URL
@@ -555,7 +556,7 @@ export const productsService = {
       });
 
       products.push(productData);
-      
+
       try {
         localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
         console.log('Product saved successfully');
@@ -642,7 +643,7 @@ export const productsService = {
 
       const newImages = await Promise.all(imagePromises);
       updatedProduct.images = [...existingImages, ...newImages];
-      
+
       // Ensure first image is main
       if (updatedProduct.images.length > 0) {
         updatedProduct.images = updatedProduct.images.map((img, idx) => ({
@@ -725,7 +726,7 @@ export const categoriesService = {
       }
       return c;
     });
-    
+
     if (needsUpdate) {
       localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
     }
@@ -1050,7 +1051,7 @@ export const ordersService = {
     };
 
     orders.push(newOrder);
-    
+
     try {
       localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
     } catch (storageError) {
@@ -1319,7 +1320,7 @@ export const chatService = {
       const convMessages = messages.filter(m => m.conversation_id === conv.id);
       const unreadCount = convMessages.filter(m => !m.read && m.sender_role !== 'admin').length;
       const lastMessage = convMessages[convMessages.length - 1];
-      
+
       return {
         ...conv,
         unread_count: unreadCount,
@@ -1329,7 +1330,7 @@ export const chatService = {
     });
 
     // Sort by last message time
-    conversationsWithUnread.sort((a, b) => 
+    conversationsWithUnread.sort((a, b) =>
       new Date(b.last_message_time) - new Date(a.last_message_time)
     );
 
@@ -1340,7 +1341,7 @@ export const chatService = {
     initializeData();
     const messages = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT_MESSAGES)) || [];
     const conversationMessages = messages.filter(m => m.conversation_id === conversationId);
-    
+
     // Sort by time
     conversationMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
 
