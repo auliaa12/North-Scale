@@ -60,7 +60,9 @@ const Cart = () => {
                   <img
                     src={item.product.main_image?.startsWith('data:image/') || item.product.main_image?.startsWith('http://') || item.product.main_image?.startsWith('https://')
                       ? item.product.main_image
-                      : `http://localhost:8000/storage/${item.product.main_image}`}
+                      : item.product.main_image
+                        ? item.product.main_image
+                        : '/placeholder-product.jpg'}
                     alt={item.product.name}
                     className="w-full h-full object-cover rounded"
                     onError={(e) => {

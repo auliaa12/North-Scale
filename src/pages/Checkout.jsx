@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { ordersAPI } from '../services/api';
 import { FaShoppingBag } from 'react-icons/fa';
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { cart, loading: cartLoading } = useCart();
+  const { cart, loading: cartLoading, clearCart } = useCart();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -104,17 +106,29 @@ const Checkout = () => {
 
     try {
       setLoading(true);
-      
+
       // Add shipping cost to order data
       const selectedShipping = shippingOptions.find(opt => opt.id === formData.shipping_method);
       const orderData = {
         ...formData,
         shipping_cost: selectedShipping?.price || 0,
         shipping_name: selectedShipping?.name || '',
-        total_amount: getTotalWithShipping()
+        total_amount: getTotalWithShipping(),
+        user_id: user?.id,
+        items: cart.items.map(item => ({
+          product_id: item.product_id,
+          product_name: item.product_name || item.name,
+          product_price: item.product_price || item.price,
+          quantity: item.quantity,
+          subtotal: (item.product_price || item.price) * item.quantity
+        }))
       };
-      
+
       const response = await ordersAPI.create(orderData);
+
+      // Clear cart on success
+      await clearCart();
+
       const orderNumber = response.data.order_number;
       navigate(`/order-confirmation/${orderNumber}`);
     } catch (error) {
@@ -250,11 +264,10 @@ const Checkout = () => {
                   {shippingOptions.map((option) => (
                     <div
                       key={option.id}
-                      className={`border p-4 rounded-lg cursor-pointer transition ${
-                        formData.shipping_method === option.id
-                          ? 'border-red-500 bg-red-50'
-                          : 'hover:border-gray-300'
-                      }`}
+                      className={`border p-4 rounded-lg cursor-pointer transition ${formData.shipping_method === option.id
+                        ? 'border-red-500 bg-red-50'
+                        : 'hover:border-gray-300'
+                        }`}
                       onClick={() =>
                         handleChange({
                           target: { name: 'shipping_method', value: option.id },
@@ -352,13 +365,27 @@ const Checkout = () => {
 
                 <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
                   {cart.items.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span className="text-gray-600">
-                        {item.product.name} x{item.quantity}
-                      </span>
-                      <span className="font-medium">
+                    <div key={item.id} className="flex gap-3 mb-4">
+                      {/* Thumbnail */}
+                      <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 border border-gray-200">
+                        <img
+                          src={item.product.main_image?.startsWith('data') || item.product.main_image?.startsWith('http')
+                            ? item.product.main_image
+                            : item.product.main_image
+                              ? item.product.main_image
+                              : '/placeholder-product.jpg'}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover rounded"
+                          onError={(e) => { e.target.src = '/placeholder-product.jpg'; }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-800 line-clamp-2">{item.product.name}</p>
+                        <p className="text-xs text-gray-500 mt-1">Qty: {item.quantity}</p>
+                      </div>
+                      <div className="text-sm font-medium text-gray-800">
                         {formatPrice(item.product.price * item.quantity)}
-                      </span>
+                      </div>
                     </div>
                   ))}
                 </div>

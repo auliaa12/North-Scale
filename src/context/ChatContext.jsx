@@ -24,24 +24,24 @@ export const ChatProvider = ({ children }) => {
     try {
       setLoading(true);
       let response;
-      
+
       // For admin, get all conversations
       if (admin) {
         response = await chatAPI.getConversations();
-      } 
+      }
       // For logged in user, filter by user_id
       else if (user) {
         response = await chatAPI.getConversations(user.id);
       }
       // For guest users, use session_id
       else {
-        const { getSessionId } = await import('../services/localStorage');
+        const { getSessionId } = await import('../services/api');
         const sessionId = getSessionId();
         response = await chatAPI.getConversations(null, sessionId);
       }
-      
+
       setConversations(response.data);
-      
+
       // Count unread messages
       const unread = response.data.reduce((count, conv) => {
         return count + (conv.unread_count || 0);
@@ -59,7 +59,7 @@ export const ChatProvider = ({ children }) => {
       const response = await chatAPI.getMessages(conversationId);
       setMessages(response.data);
       setCurrentConversation(conversationId);
-      
+
       // Mark as read
       await chatAPI.markAsRead(conversationId);
       fetchConversations(); // Refresh unread count
@@ -104,7 +104,7 @@ export const ChatProvider = ({ children }) => {
         return null;
       } else {
         // Guest user - use session_id
-        const { getSessionId } = await import('../services/localStorage');
+        const { getSessionId } = await import('../services/api');
         sessionId = getSessionId();
       }
 
@@ -120,7 +120,7 @@ export const ChatProvider = ({ children }) => {
   useEffect(() => {
     // Always allow chat access, even for guests
     fetchConversations();
-    
+
     // Poll for new messages every 5 seconds
     const interval = setInterval(fetchConversations, 5000);
     return () => clearInterval(interval);

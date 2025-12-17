@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { userService } from '../services/localStorage';
+import { userAPI } from '../services/api';
 import { FcGoogle } from 'react-icons/fc';
 
 const Register = () => {
@@ -34,7 +34,7 @@ const Register = () => {
         setLoading(true);
 
         try {
-            await userService.register(formData);
+            await userAPI.register(formData);
             navigate('/login', { replace: true, state: { registered: true } });
         } catch (err) {
             setError(err.message || 'Registration failed');

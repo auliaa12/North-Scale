@@ -14,7 +14,7 @@ const UserOrders = () => {
             try {
                 if (user?.id) {
                     const response = await userAPI.getUserOrders(user.id);
-                    setOrders(response.data);
+                    setOrders(response.data.data);
                 }
             } catch (error) {
                 console.error('Failed to fetch orders:', error);
@@ -83,11 +83,13 @@ const UserOrders = () => {
                                             {/* Product Image */}
                                             <div className="w-16 h-16 bg-gray-100 rounded md:w-20 md:h-20 flex-shrink-0">
                                                 {item.product?.main_image ? (
-                                                    <img 
+                                                    <img
                                                         src={item.product.main_image?.startsWith('data:image/') || item.product.main_image?.startsWith('http://') || item.product.main_image?.startsWith('https://')
-                                                          ? item.product.main_image
-                                                          : `http://localhost:8000/storage/${item.product.main_image}`}
-                                                        alt={item.product_name} 
+                                                            ? item.product.main_image
+                                                            : item.product.main_image
+                                                                ? item.product.main_image
+                                                                : '/placeholder-product.jpg'}
+                                                        alt={item.product_name}
                                                         className="w-full h-full object-cover rounded"
                                                         onError={(e) => {
                                                             e.target.src = '/placeholder-product.jpg';

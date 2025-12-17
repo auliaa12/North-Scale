@@ -218,7 +218,7 @@ const AdminOrders = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2 flex-wrap">
                         {/* Quick Status Actions */}
-                        {order.status === 'pending' && (
+                        {order.status?.toLowerCase().trim() === 'pending' && (
                           <>
                             <button
                               onClick={() => handleUpdateStatus(order.id, 'processing')}
@@ -240,7 +240,7 @@ const AdminOrders = () => {
                             </button>
                           </>
                         )}
-                        {order.status === 'processing' && (
+                        {order.status?.toLowerCase().trim() === 'processing' && (
                           <button
                             onClick={() => handleUpdateStatus(order.id, 'shipped')}
                             className="px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-xs rounded transition"
@@ -249,7 +249,7 @@ const AdminOrders = () => {
                             Ship
                           </button>
                         )}
-                        {order.status === 'shipped' && (
+                        {order.status?.toLowerCase().trim() === 'shipped' && (
                           <button
                             onClick={() => handleUpdateStatus(order.id, 'completed')}
                             className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded transition"
@@ -262,7 +262,7 @@ const AdminOrders = () => {
                         {/* View & Delete Actions */}
                         <button
                           onClick={() => handleViewOrder(order)}
-                          className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition"
+                          className="p-2 ml-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition"
                           title="View Details"
                         >
                           <FaEye />
@@ -371,7 +371,9 @@ const AdminOrders = () => {
                       <img
                         src={item.product.main_image?.startsWith('data:image/') || item.product.main_image?.startsWith('http://') || item.product.main_image?.startsWith('https://')
                           ? item.product.main_image
-                          : `http://localhost:8000/storage/${item.product.main_image}`}
+                          : item.product.main_image
+                            ? item.product.main_image
+                            : '/placeholder-product.jpg'}
                         alt={item.product_name}
                         className="w-20 h-20 object-cover rounded"
                         onError={(e) => {
@@ -391,7 +393,7 @@ const AdminOrders = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Order Summary */}
               <div className="mt-4 pt-4 border-t space-y-2">
                 <div className="flex justify-between text-sm">

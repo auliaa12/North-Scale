@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productsAPI, wishlistAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -131,14 +132,15 @@ const ProductDetail = () => {
                       <button
                         key={image.id}
                         onClick={() => setSelectedImage(index)}
-                        className={`flex-shrink-0 w-24 h-24 rounded-lg border-2 overflow-hidden transition-all hover:border-red-500 ${
-                          selectedImage === index ? 'border-red-600 ring-2 ring-red-300' : 'border-gray-300'
-                        }`}
+                        className={`flex-shrink-0 w-24 h-24 rounded-lg border-2 overflow-hidden transition-all hover:border-red-500 ${selectedImage === index ? 'border-red-600 ring-2 ring-red-300' : 'border-gray-300'
+                          }`}
                       >
                         <img
-                          src={image.image_path?.startsWith('data:image/') || image.image_path?.startsWith('http://') || image.image_path?.startsWith('https://') 
-                          ? image.image_path 
-                          : `http://localhost:8000/storage/${image.image_path}`}
+                          src={image.image_path?.startsWith('data:image/') || image.image_path?.startsWith('http://') || image.image_path?.startsWith('https://')
+                            ? image.image_path
+                            : image.image_path
+                              ? image.image_path
+                              : '/placeholder-product.jpg'}
                           alt={`Thumbnail ${index + 1}`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -157,7 +159,9 @@ const ProductDetail = () => {
                       <img
                         src={product.images[selectedImage].image_path?.startsWith('data:image/') || product.images[selectedImage].image_path?.startsWith('http://') || product.images[selectedImage].image_path?.startsWith('https://')
                           ? product.images[selectedImage].image_path
-                          : `http://localhost:8000/storage/${product.images[selectedImage].image_path}`}
+                          : product.images[selectedImage].image_path
+                            ? product.images[selectedImage].image_path
+                            : '/placeholder-product.jpg'}
                         alt={product.name}
                         className="w-full h-full object-contain"
                         onError={(e) => {
@@ -286,6 +290,27 @@ const ProductDetail = () => {
               >
                 <FaShoppingCart className="text-xl" />
                 <span>{product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}</span>
+              </button>
+
+              {/* Buy Now Button */}
+              <button
+                onClick={async () => {
+                  if (quantity > product.stock) {
+                    alert('Quantity exceeds available stock');
+                    return;
+                  }
+                  const success = await addToCart(product.id, quantity);
+                  if (success) {
+                    navigate('/checkout');
+                  } else {
+                    alert('Failed to process buy now');
+                  }
+                }}
+                disabled={product.stock === 0}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold text-lg py-4 flex items-center justify-center space-x-3 rounded transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                <FaShoppingCart className="text-xl" />
+                <span>Buy Now</span>
               </button>
 
               <button

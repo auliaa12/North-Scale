@@ -9,7 +9,7 @@ const AdminCategories = () => {
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     type: 'jenis',
@@ -24,10 +24,10 @@ const AdminCategories = () => {
     try {
       setLoading(true);
       const jenisRes = await categoriesAPI.getAll({ type: 'jenis' });
-      setJenisCategories(jenisRes.data);
+      setJenisCategories(jenisRes.data.data);
 
       const merkRes = await categoriesAPI.getAll({ type: 'merk' });
-      setMerkCategories(merkRes.data);
+      setMerkCategories(merkRes.data.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
     } finally {

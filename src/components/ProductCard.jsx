@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product, showDiscount = false }) => {
   const { addToCart } = useCart();
-  
+
   // Helper function to get image URL (handles both base64 data URLs and file paths)
   const getImageUrl = (imagePath) => {
     if (!imagePath) return '/placeholder-product.jpg';
@@ -12,10 +12,10 @@ const ProductCard = ({ product, showDiscount = false }) => {
     if (imagePath.startsWith('data:image/') || imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    // Otherwise, assume it's a file path
-    return `http://localhost:8000/storage/${imagePath}`;
+    // Otherwise, assume it's a file path stored in DB (e.g., /uploads/image.jpg) - let Proxy handle it
+    return imagePath;
   };
-  
+
   const imageUrl = getImageUrl(product.main_image);
 
   const handleAddToCart = async (e) => {
@@ -61,7 +61,7 @@ const ProductCard = ({ product, showDiscount = false }) => {
         <button className="bg-white p-2 rounded-full shadow-lg hover:bg-red-500 hover:text-white transition">
           <FaHeart />
         </button>
-        <Link 
+        <Link
           to={`/products/${product.id}`}
           className="bg-white p-2 rounded-full shadow-lg hover:bg-red-500 hover:text-white transition"
         >

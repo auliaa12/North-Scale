@@ -12,7 +12,7 @@ const AdminProductForm = () => {
   const [loadingData, setLoadingData] = useState(isEdit);
   const [jenisCategories, setJenisCategories] = useState([]);
   const [merkCategories, setMerkCategories] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -40,10 +40,10 @@ const AdminProductForm = () => {
   const fetchCategories = async () => {
     try {
       const jenisRes = await categoriesAPI.getAll({ type: 'jenis' });
-      setJenisCategories(jenisRes.data);
+      setJenisCategories(jenisRes.data.data);
 
       const merkRes = await categoriesAPI.getAll({ type: 'merk' });
-      setMerkCategories(merkRes.data);
+      setMerkCategories(merkRes.data.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -54,7 +54,7 @@ const AdminProductForm = () => {
       setLoadingData(true);
       const response = await productsAPI.getById(id);
       const product = response.data;
-      
+
       setFormData({
         name: product.name,
         description: product.description || '',
@@ -82,7 +82,7 @@ const AdminProductForm = () => {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
-    
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -91,12 +91,12 @@ const AdminProductForm = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const totalImages = existingImages.length + images.length + files.length;
-    
+
     if (totalImages > 5) {
       alert(`Maximum 5 images allowed. You can only add ${5 - existingImages.length - images.length} more image(s).`);
       return;
     }
-    
+
     setImages([...images, ...files]);
   };
 
@@ -137,12 +137,12 @@ const AdminProductForm = () => {
       setLoading(true);
 
       const data = new FormData();
-      
+
       // Append form data
       Object.keys(formData).forEach((key) => {
         // Convert boolean to string for FormData
-        const value = typeof formData[key] === 'boolean' 
-          ? formData[key].toString() 
+        const value = typeof formData[key] === 'boolean'
+          ? formData[key].toString()
           : formData[key];
         data.append(key, value);
       });
@@ -348,7 +348,7 @@ const AdminProductForm = () => {
           <label className="block text-sm font-medium mb-2">
             Product Images (Max 5) {!isEdit && <span className="text-red-500">*</span>}
           </label>
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
             <p className="text-sm text-blue-800">
               <strong>📸 Important:</strong> The first image will be used as the main thumbnail. You can upload up to 5 images total.
@@ -361,7 +361,7 @@ const AdminProductForm = () => {
               Images: {existingImages.length + images.length} / 5
             </span>
           </div>
-          
+
           {/* Existing Images (Edit Mode) */}
           {isEdit && existingImages.length > 0 && (
             <div className="mb-4">
@@ -372,11 +372,10 @@ const AdminProductForm = () => {
                     <img
                       src={image.image_path?.startsWith('data:image/') || image.image_path?.startsWith('http://') || image.image_path?.startsWith('https://')
                         ? image.image_path
-                        : `http://localhost:8000/storage/${image.image_path}`}
+                        : image.image_path}
                       alt="Product"
-                      className={`w-full h-32 object-cover rounded border-2 ${
-                        index === 0 ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-gray-200'
-                      }`}
+                      className={`w-full h-32 object-cover rounded border-2 ${index === 0 ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-gray-200'
+                        }`}
                     />
                     {index === 0 && (
                       <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold flex items-center space-x-1">
@@ -434,11 +433,10 @@ const AdminProductForm = () => {
                     <img
                       src={URL.createObjectURL(image)}
                       alt={`Preview ${index}`}
-                      className={`w-full h-32 object-cover rounded border-2 ${
-                        index === 0 && existingImages.length === 0 
-                          ? 'border-yellow-400 ring-2 ring-yellow-200' 
-                          : 'border-red-300'
-                      }`}
+                      className={`w-full h-32 object-cover rounded border-2 ${index === 0 && existingImages.length === 0
+                        ? 'border-yellow-400 ring-2 ring-yellow-200'
+                        : 'border-red-300'
+                        }`}
                     />
                     <div className="absolute top-2 right-2 bg-gray-900 bg-opacity-70 text-white px-2 py-1 rounded text-xs font-bold">
                       #{existingImages.length + index + 1}

@@ -22,9 +22,35 @@ export const CartProvider = ({ children }) => {
       setLoading(true);
       // Pass user.id if logged in
       const response = await cartAPI.getCart(user?.id);
-      setCart(response.data);
+
+      // Transform API response (array wrapped in data) to Cart Context state shape
+      const cartItems = response.data.data || []; // API returns { data: [...] }
+
+      const total = cartItems.reduce((sum, item) => sum + (Number(item.product_price) * item.quantity), 0);
+      const itemCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+
+      setCart({
+        items: cartItems.map(item => ({
+          ...item,
+          id: item.id,
+          price: Number(item.product_price), // Ensure price is number
+          name: item.product_name,
+          image: item.product_image,
+          product: { // Mock product object in case UI expects nested product
+            id: item.product_id,
+            name: item.product_name,
+            price: Number(item.product_price),
+            main_image: item.product_image,
+            images: [{ image_path: item.product_image }]
+          }
+        })),
+        total: total,
+        item_count: itemCount
+      });
     } catch (error) {
       console.error('Error fetching cart:', error);
+      // Fallback empty state on error to prevent undefined crashes
+      setCart({ items: [], total: 0, item_count: 0 });
     } finally {
       setLoading(false);
     }

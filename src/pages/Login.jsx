@@ -14,7 +14,7 @@ const Login = () => {
 
     const navigate = useNavigate();
     const location = useLocation();
-    const from = location.state?.from?.pathname || '/account';
+    const from = location.state?.from?.pathname || '/';
 
     useEffect(() => {
         // Check if user just registered
@@ -38,9 +38,12 @@ const Login = () => {
         setError('');
         setLoading(true);
 
+        console.log("Attempting login with:", formData);
         const result = await loginUser(formData);
+        console.log("Login result:", result);
 
         if (result.success) {
+            console.log("Navigating to:", from);
             navigate(from, { replace: true });
         } else {
             setError(result.message);

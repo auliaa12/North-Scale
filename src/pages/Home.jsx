@@ -17,7 +17,7 @@ const Home = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Fetch featured products
         const featuredRes = await productsAPI.getAll({ featured: true, per_page: 4 });
         setFeaturedProducts(featuredRes.data.data);
@@ -28,10 +28,10 @@ const Home = () => {
 
         // Fetch categories
         const jenisRes = await categoriesAPI.getAll({ type: 'jenis' });
-        setJenisCategories(jenisRes.data);
+        setJenisCategories(jenisRes.data.data || []);
 
         const merkRes = await categoriesAPI.getAll({ type: 'merk' });
-        setMerkCategories(merkRes.data);
+        setMerkCategories(merkRes.data.data || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -70,8 +70,8 @@ const Home = () => {
                 Up to 10%<br />
                 <span className="text-red-500">off Voucher</span>
               </h1>
-              <Link 
-                to="/products" 
+              <Link
+                to="/products"
                 className="inline-flex items-center gap-3 text-white border-b-2 border-white pb-1 hover:border-red-500 hover:text-red-500 transition group"
               >
                 <span className="text-lg font-medium">Shop Now</span>
@@ -82,8 +82,8 @@ const Home = () => {
             {/* Right Image */}
             <div className="relative">
               <div className="bg-gradient-to-br from-red-500/20 to-transparent rounded-2xl p-8">
-                <img 
-                  src="/hero-banner.jpg" 
+                <img
+                  src="/hero-banner.jpg"
                   alt="Nissan Skyline R34 GT-R - Exclusive Collection"
                   className="w-full h-auto transform hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
@@ -135,7 +135,7 @@ const Home = () => {
               // Get icon based on category name (case-insensitive)
               const categoryName = category.name.toLowerCase();
               let Icon;
-              
+
               // For "other" category, use question mark icon
               if (categoryName.includes('other') || categoryName.includes('lainnya') || categoryName.includes('lain-lain')) {
                 Icon = FaQuestionCircle;
@@ -159,7 +159,7 @@ const Home = () => {
                   Icon = carIcons[index % carIcons.length];
                 }
               }
-              
+
               return (
                 <Link
                   key={category.id}
@@ -212,8 +212,8 @@ const Home = () => {
               </div>
               <h2 className="text-4xl font-bold">Best Selling Products</h2>
             </div>
-            <Link 
-              to="/products?bestseller=true" 
+            <Link
+              to="/products?bestseller=true"
               className="bg-red-500 hover:bg-red-600 text-white px-12 py-3 rounded transition font-medium"
             >
               View All
@@ -242,15 +242,15 @@ const Home = () => {
               <CountdownTimer targetDate={flashSaleEnd} />
               {(() => {
                 // Find NASCAR category by name (case-insensitive)
-                const nascarCategory = jenisCategories.find(cat => 
+                const nascarCategory = jenisCategories.find(cat =>
                   cat.name.toLowerCase().includes('nascar')
                 );
-                const nascarLink = nascarCategory 
+                const nascarLink = nascarCategory
                   ? `/products?category_jenis=${nascarCategory.id}`
                   : '/products';
-                
+
                 return (
-                  <Link 
+                  <Link
                     to={nascarLink}
                     className="inline-block mt-8 bg-accent-500 hover:bg-accent-600 text-white px-8 py-3 rounded font-medium transition"
                   >
@@ -260,8 +260,8 @@ const Home = () => {
               })()}
             </div>
             <div className="relative">
-              <img 
-                src="/nascar-banner.jpg" 
+              <img
+                src="/nascar-banner.jpg"
                 alt="NASCAR Collection - Hunt Brothers Pizza"
                 className="w-full h-auto rounded-lg"
                 onError={(e) => {

@@ -117,7 +117,9 @@ const AdminProducts = () => {
                         <img
                           src={product.main_image?.startsWith('data:image/') || product.main_image?.startsWith('http://') || product.main_image?.startsWith('https://')
                             ? product.main_image
-                            : `http://localhost:8000/storage/${product.main_image}`}
+                            : product.main_image
+                              ? product.main_image // Database has /uploads/filename, proxy handles /uploads
+                              : '/placeholder-product.jpg'}
                           alt={product.name}
                           className="w-full h-full object-cover rounded"
                           onError={(e) => {
@@ -146,13 +148,12 @@ const AdminProducts = () => {
                     <td className="px-4 py-3 font-medium">{formatPrice(product.price)}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-block px-2 py-1 text-sm rounded ${
-                          product.stock > 10
+                        className={`inline-block px-2 py-1 text-sm rounded ${product.stock > 10
                             ? 'bg-green-100 text-green-700'
                             : product.stock > 0
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
                       >
                         {product.stock}
                       </span>
@@ -186,11 +187,10 @@ const AdminProducts = () => {
                 <button
                   key={page}
                   onClick={() => fetchProducts(page)}
-                  className={`px-4 py-2 rounded ${
-                    page === pagination.current_page
+                  className={`px-4 py-2 rounded ${page === pagination.current_page
                       ? 'bg-primary-600 text-white'
                       : 'bg-gray-200 hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>

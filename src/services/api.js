@@ -1,89 +1,113 @@
-import {
-  getSessionId,
-  authService,
-  userService,
-  productsService,
-  categoriesService,
-  cartService,
-  ordersService,
-  wishlistService,
-  chatService
-} from './localStorage';
+import axios from 'axios';
 
-// Auth API (Admin)
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add token
+api.interceptors.request.use(
+  (config) => {
+    // Only add token if not already set (allows overriding)
+    if (!config.headers['Authorization']) {
+      const token = localStorage.getItem('admin_token') || localStorage.getItem('user_token');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Helper to handle FormData for updates (Method Spoofing)
+const createFormDataForPut = (data) => {
+  if (data instanceof FormData) {
+    data.append('_method', 'PUT');
+    return data;
+  }
+  return data;
+};
+
+// Auth API
 export const authAPI = {
-  login: (credentials) => authService.login(credentials),
-  logout: () => authService.logout(),
-  getUser: () => authService.getUser(),
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (data) => api.post('/auth/register', data),
+  logout: () => api.post('/auth/logout'),
+  getUser: (config) => api.get('/auth/user', config),
 };
 
 // User API (Customer)
 export const userAPI = {
-  register: (data) => userService.register(data),
-  login: (credentials) => userService.login(credentials),
-  logout: () => userService.logout(),
-  getCurrentUser: () => userService.getCurrentUser(),
-  updateProfile: (id, data) => userService.updateProfile(id, data),
-  getUserOrders: (id) => userService.getUserOrders(id),
+  register: (data) => api.post('/auth/register', data), // utilizing same auth endpoint or specific
+  login: (credentials) => api.post('/auth/login', credentials),
+  logout: () => api.post('/auth/logout'),
+  getCurrentUser: (config) => api.get('/auth/user', config),
+  updateProfile: (id, data) => api.post(`/users/${id}`, createFormDataForPut(data)),
+  getUserOrders: (id) => api.get(`/orders?user_id=${id}`),
 };
 
 // Products API
 export const productsAPI = {
-  getAll: (params) => productsService.getAll(params),
-  getById: (id) => productsService.getById(id),
-  create: (data) => productsService.create(data),
-  update: (id, data) => productsService.update(id, data),
-  delete: (id) => productsService.delete(id),
-  setMainImage: (productId, imageId) => productsService.setMainImage(productId, imageId),
+  getAll: (params) => api.get('/products', { params }),
+  getById: (id) => api.get(`/products/${id}`),
+  create: (data) => api.post('/products', data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, data) => api.post(`/products/${id}`, createFormDataForPut(data), {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (id) => api.delete(`/products/${id}`),
+  setMainImage: (productId, imageId) => api.post(`/products/${productId}/set-main`, { image_id: imageId }),
 };
 
 // Categories API
 export const categoriesAPI = {
-  getAll: (params) => categoriesService.getAll(params),
-  getById: (id) => categoriesService.getById(id),
-  create: (data) => categoriesService.create(data),
-  update: (id, data) => categoriesService.update(id, data),
-  delete: (id) => categoriesService.delete(id),
+  getAll: (params) => api.get('/categories', { params }),
+  getById: (id) => api.get(`/categories/${id}`),
+  create: (data) => api.post('/categories', data),
+  update: (id, data) => api.put(`/categories/${id}`, data),
+  delete: (id) => api.delete(`/categories/${id}`),
 };
 
 // Cart API
 export const cartAPI = {
-  getCart: (userId) => cartService.getCart(userId),
-  addToCart: (productId, quantity, userId) => cartService.addToCart(productId, quantity, getSessionId(), userId),
-  updateCart: (id, quantity) => cartService.updateCart(id, quantity),
-  removeFromCart: (id) => cartService.removeFromCart(id),
-  clearCart: (userId) => cartService.clearCart(getSessionId(), userId),
+  getCart: (userId) => api.get(`/cart?user_id=${userId}`),
+  addToCart: (productId, quantity, userId) => api.post('/cart', { product_id: productId, quantity, user_id: userId }),
+  updateCart: (id, quantity) => api.put(`/cart/${id}`, { quantity }),
+  removeFromCart: (id) => api.delete(`/cart/${id}`),
+  clearCart: (userId) => api.delete(`/cart?user_id=${userId}`),
 };
 
 // Orders API
 export const ordersAPI = {
-  getAll: (params) => ordersService.getAll(params),
-  getById: (id) => ordersService.getById(id),
-  create: (data) => ordersService.create({ ...data, session_id: getSessionId() }),
-  updateStatus: (id, status) => ordersService.updateStatus(id, status),
-  delete: (id) => ordersService.delete(id),
+  getAll: (params) => api.get('/orders', { params }),
+  getById: (id) => api.get(`/orders/${id}`),
+  create: (data) => api.post('/orders', data),
+  updateStatus: (id, status) => api.post(`/orders/${id}`, { status }), // simplified
+  delete: (id) => api.delete(`/orders/${id}`),
 };
 
-// Wishlist API (Private)
+// Wishlist API
 export const wishlistAPI = {
-  getWishlist: (userId) => wishlistService.getWishlist(userId),
-  addToWishlist: (userId, productId) => wishlistService.addToWishlist(userId, productId),
-  removeFromWishlist: (userId, productId) => wishlistService.removeFromWishlist(userId, productId),
-  checkWishlist: (userId, productId) => wishlistService.checkWishlist(userId, productId),
+  getWishlist: (userId) => api.get(`/wishlist?user_id=${userId}`),
+  addToWishlist: (userId, productId) => api.post('/wishlist', { user_id: userId, product_id: productId }),
+  removeFromWishlist: (userId, productId) => api.delete(`/wishlist?user_id=${userId}&product_id=${productId}`),
+  checkWishlist: (userId, productId) => api.get(`/wishlist?user_id=${userId}&check_product_id=${productId}`),
 };
 
-// Chat API
+// Chat API (Placeholder)
 export const chatAPI = {
-  getConversations: (userId = null, sessionId = null) => chatService.getConversations(userId, sessionId),
-  getMessages: (conversationId) => chatService.getMessages(conversationId),
-  sendMessage: (conversationId, data) => chatService.sendMessage(conversationId, data),
-  createConversation: (userId, userName, sessionId = null) => chatService.createConversation(userId, userName, sessionId),
-  markAsRead: (conversationId) => chatService.markAsRead(conversationId),
+  getConversations: () => Promise.resolve({ data: [] }),
+  getMessages: () => Promise.resolve({ data: [] }),
+  sendMessage: () => Promise.resolve({}),
 };
 
-export { getSessionId };
+export const getSessionId = () => {
+  // Keep internal session ID logic if needed or fetch from server
+  return 'session_' + Date.now();
+};
+
 export default { authAPI, userAPI, productsAPI, categoriesAPI, cartAPI, ordersAPI, wishlistAPI, chatAPI };
-
-
-
-
