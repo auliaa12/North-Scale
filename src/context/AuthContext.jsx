@@ -32,6 +32,13 @@ export const AuthProvider = ({ children }) => {
       setAdmin(adminData);
       return { success: true };
     } catch (error) {
+      console.error("Admin Login Error Details:", error);
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Network Error: Unable to connect to server. Check console for "Mixed Content" or CORS errors.'
+        };
+      }
       return {
         success: false,
         message: error.response?.data?.message || 'Login failed'
@@ -55,6 +62,13 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return { success: true };
     } catch (error) {
+      console.error("Login Error Details:", error);
+      if (!error.response) {
+        return {
+          success: false,
+          message: 'Network Error: Unable to connect to server. Check console for "Mixed Content" or CORS errors.'
+        };
+      }
       return {
         success: false,
         message: error.response?.data?.message || 'Login failed'
