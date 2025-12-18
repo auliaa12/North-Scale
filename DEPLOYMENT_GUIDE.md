@@ -29,9 +29,9 @@ Panduan ALL-IN-ONE untuk hosting **GRATIS** project North Scale dari awal sampai
 ### File yang Tersedia
 
 Setelah export, Anda punya file:
-- **`northscale_database_fixed.sql`** ✅ **PAKAI INI!**
-  - Sudah di-fix untuk MySQL 5.5/5.6 compatibility
-  - Tidak ada error TIMESTAMP
+- **`northscale_clean.sql`** ✅ **PAKAI INI!**
+  - Sudah di-fix TOTAL untuk MySQL 5.5/5.6
+  - Tidak ada `ON UPDATE CURRENT_TIMESTAMP` error lagi
   - Siap diimport ke hosting manapun
 
 ---
@@ -99,7 +99,7 @@ Setelah export, Anda punya file:
 2. Login dengan kredensial di atas
 3. Pilih database `freedb_xxxxx_northscale`
 4. Tab **Import**
-5. Choose File → **`northscale_database_fixed.sql`**
+5. Choose File → **`northscale_clean.sql`**
 6. Klik **Go**
 7. Tunggu ~1 menit
 8. ✅ Success: "Import has been successfully finished"
@@ -253,7 +253,7 @@ Buka URL Vercel → Test:
 1. vPanel → **phpMyAdmin**
 2. Login
 3. Pilih database `epiz_xxxxx_northscale`
-4. Import → **`northscale_database_fixed.sql`**
+4. Import → **`northscale_clean.sql`**
 5. Go → Tunggu
 
 #### D. Upload Backend Files
@@ -310,13 +310,13 @@ VITE_API_BASE_URL = http://your-subdomain.infinityfreeapp.com/api
 
 ### ❌ Error: "Unexpected character" saat import
 
-**Solusi**: Pakai file `northscale_database_fixed.sql` (bukan yang lain)
+**Solusi**: Pakai file `northscale_clean.sql` (bukan yang lain)
 
 ---
 
 ### ❌ Error: "TIMESTAMP column" 
 
-**Solusi**: File `northscale_database_fixed.sql` sudah fix issue ini. Pastikan pakai file yang benar.
+**Solusi**: File `northscale_clean.sql` sudah fix issue ini. Pastikan pakai file yang benar.
 
 ---
 
