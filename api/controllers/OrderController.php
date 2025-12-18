@@ -104,9 +104,38 @@ class OrderController
         $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($order) {
-            $stmtItems = $this->conn->prepare("SELECT * FROM order_items WHERE order_id = :oid");
+            // Fetch items with product information and images
+            $stmtItems = $this->conn->prepare("
+                SELECT oi.*, p.name as product_name, pi.image_path as main_image 
+                FROM order_items oi
+                LEFT JOIN products p ON oi.product_id = p.id
+                LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_main = 1
+                WHERE oi.order_id = :oid
+                GROUP BY oi.id
+            ");
             $stmtItems->execute([':oid' => $order['id']]);
-            $order['items'] = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+            $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+            // Structure product data for each item
+            foreach ($items as &$item) {
+                $item['product'] = [
+                    'id' => $item['product_id'],
+                    'name' => $item['product_name'],
+                    'main_image' => $item['main_image']
+                ];
+
+                // Fallback: If no main image, get any image
+                if (!$item['product']['main_image']) {
+                    $stmtImg = $this->conn->prepare("SELECT image_path FROM product_images WHERE product_id = :pid LIMIT 1");
+                    $stmtImg->execute([':pid' => $item['product_id']]);
+                    $img = $stmtImg->fetch(PDO::FETCH_ASSOC);
+                    if ($img) {
+                        $item['product']['main_image'] = $img['image_path'];
+                    }
+                }
+            }
+
+            $order['items'] = $items;
             echo json_encode(["data" => $order]);
         } else {
             header("HTTP/1.1 404 Not Found");

@@ -23,11 +23,11 @@ const AdminAnalytics = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch orders
       const ordersResponse = await ordersAPI.getAll({});
       const orders = ordersResponse.data.data || [];
-      
+
       // Fetch products
       const productsResponse = await productsAPI.getAll({});
       const products = productsResponse.data.data || [];
@@ -41,20 +41,20 @@ const AdminAnalytics = () => {
       monthAgo.setMonth(monthAgo.getMonth() - 1);
 
       const totalRevenue = orders.reduce((sum, order) => {
-        return sum + (order.total_amount || order.total);
+        return sum + Number(order.total_amount || order.total || 0);
       }, 0);
 
       const todayRevenue = orders
         .filter(order => new Date(order.created_at) >= today)
-        .reduce((sum, order) => sum + (order.total_amount || order.total), 0);
+        .reduce((sum, order) => sum + Number(order.total_amount || order.total || 0), 0);
 
       const weekRevenue = orders
         .filter(order => new Date(order.created_at) >= weekAgo)
-        .reduce((sum, order) => sum + (order.total_amount || order.total), 0);
+        .reduce((sum, order) => sum + Number(order.total_amount || order.total || 0), 0);
 
       const monthRevenue = orders
         .filter(order => new Date(order.created_at) >= monthAgo)
-        .reduce((sum, order) => sum + (order.total_amount || order.total), 0);
+        .reduce((sum, order) => sum + Number(order.total_amount || order.total || 0), 0);
 
       const pendingOrders = orders.filter(order => order.status === 'pending').length;
 
