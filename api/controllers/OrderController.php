@@ -190,7 +190,7 @@ class OrderController
 
     private function logDebug($message)
     {
-        $logFile = 'c:/xampp/htdocs/northscale/api/order_debug.log';
+        $logFile = dirname(__DIR__) . '/order_debug.log';
         $timestamp = date('Y-m-d H:i:s');
         file_put_contents($logFile, "[$timestamp] $message" . PHP_EOL, FILE_APPEND);
     }
