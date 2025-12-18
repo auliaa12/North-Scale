@@ -22,6 +22,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Response interceptor to handle InfinityFree/Bot HTML responses
+api.interceptors.response.use(
+  (response) => {
+    // If response is a string (HTML) but we expected JSON, it's likely a blockage or 403
+    if (typeof response.data === 'string' && response.data.trim().startsWith('<')) {
+      console.error("API Blocked: Received HTML instead of JSON. InfinityFree is likely blocking the request.");
+      return Promise.reject({
+        message: 'API Error: The free hosting server is blocking the request (Bot Protection).',
+        isHtmlError: true
+      });
+    }
+    return response;
+  },
+  (error) => {
+    console.error("API Error Details:", error);
+    return Promise.reject(error);
+  }
+);
+
 // Helper to handle FormData for updates (Method Spoofing)
 const createFormDataForPut = (data) => {
   if (data instanceof FormData) {

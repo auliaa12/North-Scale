@@ -55,6 +55,9 @@ const Products = () => {
       });
     } catch (error) {
       console.error('Error fetching products:', error);
+      if (error.isHtmlError) {
+        alert("Connection Failed: The free hosting server blocked the request. Please check the console.");
+      }
     } finally {
       setLoading(false);
     }
@@ -69,7 +72,7 @@ const Products = () => {
     if (priceMax) params.price_max = priceMax;
     params.sort_by = sortBy;
     params.sort_order = sortOrder;
-    
+
     setSearchParams(params);
     setShowFilters(false);
   };
@@ -263,11 +266,10 @@ const Products = () => {
                   <button
                     key={page}
                     onClick={() => handlePageChange(page)}
-                    className={`px-4 py-2 rounded ${
-                      page === pagination.current_page
+                    className={`px-4 py-2 rounded ${page === pagination.current_page
                         ? 'bg-primary-600 text-white'
                         : 'bg-gray-200 hover:bg-gray-300'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
