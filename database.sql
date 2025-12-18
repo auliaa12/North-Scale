@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `shipping_address` TEXT NOT NULL,
   `notes` TEXT,
   `total_amount` DECIMAL(15, 2) NOT NULL,
-  `status` ENUM('pending', 'processing', 'completed', 'cancelled') DEFAULT 'pending',
+  `status` ENUM('pending', 'processing', 'shipped', 'completed', 'cancelled') DEFAULT 'pending',
   `snap_token` VARCHAR(255), -- For Midtrans or similar
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

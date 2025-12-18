@@ -48,6 +48,11 @@ $id = null;
 
 if ($apiIndex !== false && isset($uri[$apiIndex + 1])) {
     $resource = $uri[$apiIndex + 1];
+    // Handle trailing slash (empty resource)
+    if ($resource === '') {
+        echo json_encode(["message" => "Welcome to North Scale API"]);
+        exit;
+    }
     if (isset($uri[$apiIndex + 2])) {
         $id = $uri[$apiIndex + 2];
     }
